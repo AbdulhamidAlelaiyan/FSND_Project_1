@@ -133,7 +133,19 @@ def venues():
             "num_upcoming_shows": 0,
         }]
     }]
-    return render_template('pages/venues.html', areas=data)
+    locations = Venue.query.with_entities(Venue.state, Venue.city).distinct(Venue.state, Venue.city).all()
+    local_data = []
+    for location in locations:
+        venues = Venue.query.filter_by(state=location[0], city=location[1]).all()
+        for venue in venues:
+            venue.num_upcoming_shows = len(Show.query.filter_by(venue_id=venue.id).all())
+        local_data.append({
+            "state": location[0],
+            "city": location[1],
+            "venues": Venue.query.filter_by(state=location[0], city=location[1]).all()
+        })
+        
+    return render_template('pages/venues.html', areas=local_data)
 
 
 @app.route('/venues/search', methods=['POST'])
@@ -233,6 +245,7 @@ def show_venue(venue_id):
         "past_shows_count": 1,
         "upcoming_shows_count": 1,
     }
+    
     data = list(filter(lambda d: d['id'] ==
                 venue_id, [data1, data2, data3]))[0]
     return render_template('pages/show_venue.html', venue=data)
