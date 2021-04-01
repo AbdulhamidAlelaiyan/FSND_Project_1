@@ -2,6 +2,7 @@
 # Imports
 #----------------------------------------------------------------------------#
 
+import sys
 import json
 import dateutil.parser
 import babel
@@ -41,9 +42,9 @@ class Venue(db.Model):
     phone = db.Column(db.String(120), nullable=False)
     image_link = db.Column(db.String(500), nullable=False)
     facebook_link = db.Column(db.String(120))
-    website = db.Column(db.String(120))
+    website_link = db.Column(db.String(120))
     seeking_talent = db.Column(db.Boolean, nullable=False)
-    seeking_description = db.Column(db.String(500), nullable=False)
+    seeking_description = db.Column(db.String(500))
     genres = db.Column(db.String(120), nullable=False)
     shows = db.relationship('Show', backref='venue',
                             lazy=True, cascade="all, delete-orphan")
@@ -54,16 +55,16 @@ class Artist(db.Model):
     __tablename__ = 'Artist'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    genres = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
+    name = db.Column(db.String, nullable=False)
+    city = db.Column(db.String(120), nullable=False)
+    state = db.Column(db.String(120), nullable=False)
+    phone = db.Column(db.String(120), nullable=False)
+    genres = db.Column(db.String(120), nullable=False)
+    image_link = db.Column(db.String(500), nullable=False)
     facebook_link = db.Column(db.String(120))
-    website = db.Column(db.String(120))
+    website_link = db.Column(db.String(120))
     seeking_venue = db.Column(db.Boolean, nullable=False)
-    seeking_description = db.Column(db.String(500), nullable=False)
+    seeking_description = db.Column(db.String(500))
     shows = db.relationship('Show', backref='artist',
                             lazy=True, cascade="all, delete-orphan")
 
@@ -250,10 +251,34 @@ def create_venue_form():
 def create_venue_submission():
     # TODO: insert form data as a new Venue record in the db, instead
     # TODO: modify data to be the data object returned from db insertion
+    error = False
+    data = {k: v for k,v in request.form.items()}
+    if data.get('seeking_talent') == 'y':
+        data['seeking_talent'] = True
+    else:
+        data['seeking_talent'] = False
+
+    try:
+        venue = Venue(name=data.get('name'), city=data.get('city'),
+            state=data.get('state'), address=data.get('address'), phone=data.get('phone'),
+            image_link=data.get('image_link'), facebook_link=data.get('facebook_link'),
+            website_link=data.get('website_link'), seeking_talent=data.get('seeking_talent', False),
+            seeking_description=data.get('seeking_description'), genres=request.form.getlist('genres'),
+            )
+        db.session.add(venue)
+        db.session.commit()
+    except:
+        error = True
+        db.session.rollback()
+        print(sys.exc_info())
+    finally:
+        db.session.close()
 
     # on successful db insert, flash success
-    flash('Venue ' + request.form['name'] + ' was successfully listed!')
-    # TODO: on unsuccessful db insert, flash an error instead.
+    if not error:
+        flash('Venue ' + data['name'] + ' was successfully listed!')
+    else:
+        flash('An error occurred. Venue ' + data['name'] + ' could not be listed.')  # TODO: on unsuccessful db insert, flash an error instead.
     # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
     # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
     return render_template('pages/home.html')
