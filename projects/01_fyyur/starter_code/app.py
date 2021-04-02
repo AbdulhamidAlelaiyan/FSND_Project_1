@@ -14,6 +14,7 @@ from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
 from flask_migrate import Migrate
+import datetime
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -250,9 +251,31 @@ def show_venue(venue_id):
     #             venue_id, [data1, data2, data3]))[0]
 
     venue = Venue.query.filter_by(id=venue_id).all()[0]
+
     venue.genres = venue.genres[1:]
     venue.genres = venue.genres[:-1]
     venue.genres = venue.genres.split(',')
+
+    now = datetime.datetime.now()
+    venue.past_shows = Show.query.filter_by(venue_id=venue_id).filter(Show.start_time < now).all()
+    venue.upcoming_shows = Show.query.filter_by(venue_id=venue_id).filter(Show.start_time >= now).all()
+    
+    for show in venue.past_shows:
+        show.start_time = str(show.start_time)
+        artist = Artist.query.filter_by(id=show.artist_id).all()[0]
+        show.artist_image_link = artist.image_link
+        show.artist_name = artist.name
+        show.artist_id = artist.id
+
+    for show in venue.upcoming_shows:
+        show.start_time = str(show.start_time)
+        artist = Artist.query.filter_by(id=show.artist_id).all()[0]
+        show.artist_image_link = artist.image_link
+        show.artist_name = artist.name
+        show.artist_id = artist.id
+
+    venue.past_shows_count = len(venue.past_shows)
+    venue.upcoming_shows_count = len(venue.upcoming_shows)
 
     return render_template('pages/show_venue.html', venue=venue)
 
