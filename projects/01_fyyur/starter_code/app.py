@@ -76,7 +76,7 @@ class Show(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id'), nullable=False)
     venue_id = db.Column(db.Integer, db.ForeignKey('Venue.id'), nullable=False)
-    start_time = db.Column(db.DateTime)
+    start_time = db.Column(db.DateTime, nullable=False)
 
 # Done Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
 
@@ -373,7 +373,6 @@ def artists():
     #     "name": "The Wild Sax Band",
     # }]
     artists = Artist.query.all();
-    print(artists)
 
     return render_template('pages/artists.html', artists=artists)
 
@@ -527,6 +526,8 @@ def edit_artist(artist_id):
     #     "image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80"
     # }
 
+
+
     artist = Artist.query.filter_by(id=artist_id).all()[0]
     # Done: populate form with fields from artist with ID <artist_id>
     return render_template('forms/edit_artist.html', form=form, artist=artist)
@@ -630,7 +631,6 @@ def create_artist_submission():
     # Done: modify data to be the data object returned from db insertion
     error = False
     data = {k: v for k,v in request.form.items() if v != ''}
-    print(data)
 
     if data.get('seeking_venue') == 'y':
         data['seeking_venue'] = True
@@ -734,7 +734,6 @@ def create_show_submission():
 
     error = False
     data = {k: v for k,v in request.form.items() if v != ''}
-    print(data)
 
     try:
         show = Show(artist_id=data.get('artist_id'), venue_id=data.get('venue_id'),
