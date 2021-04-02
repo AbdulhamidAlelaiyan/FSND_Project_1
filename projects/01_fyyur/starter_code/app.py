@@ -257,9 +257,12 @@ def show_venue(venue_id):
 
     venue = Venue.query.filter_by(id=venue_id).all()[0]
 
-    venue.genres = venue.genres[1:]
-    venue.genres = venue.genres[:-1]
-    venue.genres = venue.genres.split(',')
+    if ',' in venue.genres or '{' in venue.genres:
+        venue.genres = venue.genres[1:]
+        venue.genres = venue.genres[:-1]
+        venue.genres = venue.genres.split(',')
+    else:
+        venue.genres = [venue.genres]
 
     now = datetime.datetime.now()
     venue.past_shows = Show.query.filter_by(venue_id=venue_id).filter(Show.start_time < now).all()
@@ -484,9 +487,12 @@ def show_artist(artist_id):
     artist.past_shows_count = len(artist.past_shows)
     artist.upcoming_shows_count = len(artist.upcoming_shows)
     
-    artist.genres = artist.genres[1:]
-    artist.genres = artist.genres[:-1]
-    artist.genres = artist.genres.split(',')
+    if ',' in artist.genres or '{' in artist.genres:
+        artist.genres = artist.genres[1:]
+        artist.genres = artist.genres[:-1]
+        artist.genres = artist.genres.split(',')
+    else:
+        artist.genres = [artist.genres]
 
 
     for show in artist.past_shows:
@@ -525,10 +531,17 @@ def edit_artist(artist_id):
     #     "seeking_description": "Looking for shows to perform at in the San Francisco Bay Area!",
     #     "image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80"
     # }
-
-
-
     artist = Artist.query.filter_by(id=artist_id).all()[0]
+    
+    if ',' in artist.genres or '{' in artist.genres:
+        artist.genres = artist.genres[1:]
+        artist.genres = artist.genres[:-1]
+        artist.genres = artist.genres.split(',')
+    else:
+        artist.genres = [artist.genres]
+
+    form.genres.data = artist.genres
+
     # Done: populate form with fields from artist with ID <artist_id>
     return render_template('forms/edit_artist.html', form=form, artist=artist)
 
@@ -544,6 +557,8 @@ def edit_artist_submission(artist_id):
         data['seeking_venue'] = True
     else:
         data['seeking_venue'] = False
+    
+    data['genres'] = request.form.getlist('genres')
 
     try:
         Artist.query.filter_by(id=artist_id).update(values=data)
@@ -581,6 +596,14 @@ def edit_venue(venue_id):
     #     "image_link": "https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60"
     # }
     venue = Venue.query.filter_by(id=venue_id).all()[0]
+    if ',' in venue.genres or '{' in venue.genres:
+        venue.genres = venue.genres[1:]
+        venue.genres = venue.genres[:-1]
+        venue.genres = venue.genres.split(',')
+    else:
+        venue.genres = [venue.genres]
+
+    form.genres.data = venue.genres
     # Done: populate form with values from venue with ID <venue_id>
     return render_template('forms/edit_venue.html', form=form, venue=venue)
 
@@ -595,6 +618,8 @@ def edit_venue_submission(venue_id):
         data['seeking_talent'] = True
     else:
         data['seeking_talent'] = False
+
+    data['genres'] = request.form.getlist('genres')
 
     try:
         Venue.query.filter_by(id=venue_id).update(values=data)

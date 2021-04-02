@@ -26,8 +26,7 @@
     <div class="form-group">
       <label for="genres">Genres</label>
       <small>Ctrl+Click to select multiple</small>
-      {{ form.genres(class_ = 'form-control', placeholder='Genres, separated by commas', autofocus = true,
-      value=artist.genres) }}
+      {{ form.genres(class_ = 'form-control', placeholder='Genres, separated by commas', autofocus = true) }}
     </div>
     <div class="form-group">
       <label for="facebook_link">Facebook Link</label>
@@ -57,8 +56,13 @@
 
     <div class="form-group">
       <label for="seeking_venue">Looking for Venues</label>
+      {% if artist.seeking_venue %}
+      {{ form.seeking_venue(class_ = 'form-control', placeholder='Venue', autofocus = true, checked=True)
+      }}
+      {% else %}
       {{ form.seeking_venue(class_ = 'form-control', placeholder='Venue', autofocus = true)
       }}
+      {% endif %}
     </div>
 
     <div class="form-group">
