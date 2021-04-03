@@ -20,9 +20,10 @@ import datetime
 #----------------------------------------------------------------------------#
 
 app = Flask(__name__)
+from models import Venue, Artist, Show, db
 moment = Moment(app)
 app.config.from_object('config')
-db = SQLAlchemy(app)
+# db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 # Done: connect to a local postgresql database
@@ -32,51 +33,51 @@ migrate = Migrate(app, db)
 #----------------------------------------------------------------------------#
 
 
-class Venue(db.Model):
-    __tablename__ = 'Venue'
+# class Venue(db.Model):
+#     __tablename__ = 'Venue'
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, nullable=False)
-    city = db.Column(db.String(120), nullable=False)
-    state = db.Column(db.String(120), nullable=False)
-    address = db.Column(db.String(120), nullable=False)
-    phone = db.Column(db.String(120), nullable=False)
-    image_link = db.Column(db.String(500), nullable=False)
-    facebook_link = db.Column(db.String(120))
-    website_link = db.Column(db.String(120))
-    seeking_talent = db.Column(db.Boolean, nullable=False)
-    seeking_description = db.Column(db.String(500))
-    genres = db.Column(db.String(120), nullable=False)
-    shows = db.relationship('Show', backref='venue',
-                            lazy=True, cascade="all, delete-orphan")
-    # Done: implement any missing fields, as a database migration using Flask-Migrate
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String, nullable=False)
+#     city = db.Column(db.String(120), nullable=False)
+#     state = db.Column(db.String(120), nullable=False)
+#     address = db.Column(db.String(120), nullable=False)
+#     phone = db.Column(db.String(120), nullable=False)
+#     image_link = db.Column(db.String(500), nullable=False)
+#     facebook_link = db.Column(db.String(120))
+#     website_link = db.Column(db.String(120))
+#     seeking_talent = db.Column(db.Boolean, nullable=False)
+#     seeking_description = db.Column(db.String(500))
+#     genres = db.Column(db.String(120), nullable=False)
+#     shows = db.relationship('Show', backref='venue',
+#                             lazy=True, cascade="all, delete-orphan")
+#     # Done: implement any missing fields, as a database migration using Flask-Migrate
 
 
-class Artist(db.Model):
-    __tablename__ = 'Artist'
+# class Artist(db.Model):
+#     __tablename__ = 'Artist'
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, nullable=False)
-    city = db.Column(db.String(120), nullable=False)
-    state = db.Column(db.String(120), nullable=False)
-    phone = db.Column(db.String(120), nullable=False)
-    genres = db.Column(db.String(120), nullable=False)
-    image_link = db.Column(db.String(500), nullable=False)
-    facebook_link = db.Column(db.String(120))
-    website_link = db.Column(db.String(120))
-    seeking_venue = db.Column(db.Boolean, nullable=False)
-    seeking_description = db.Column(db.String(500))
-    shows = db.relationship('Show', backref='artist',
-                            lazy=True, cascade="all, delete-orphan")
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String, nullable=False)
+#     city = db.Column(db.String(120), nullable=False)
+#     state = db.Column(db.String(120), nullable=False)
+#     phone = db.Column(db.String(120), nullable=False)
+#     genres = db.Column(db.String(120), nullable=False)
+#     image_link = db.Column(db.String(500), nullable=False)
+#     facebook_link = db.Column(db.String(120))
+#     website_link = db.Column(db.String(120))
+#     seeking_venue = db.Column(db.Boolean, nullable=False)
+#     seeking_description = db.Column(db.String(500))
+#     shows = db.relationship('Show', backref='artist',
+#                             lazy=True, cascade="all, delete-orphan")
 
-    # Done: implement any missing fields, as a database migration using Flask-Migrate
+#     # Done: implement any missing fields, as a database migration using Flask-Migrate
 
-class Show(db.Model):
-    __tablename__ = 'Show'
-    id = db.Column(db.Integer, primary_key=True)
-    artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id'), nullable=False)
-    venue_id = db.Column(db.Integer, db.ForeignKey('Venue.id'), nullable=False)
-    start_time = db.Column(db.DateTime, nullable=False)
+# class Show(db.Model):
+#     __tablename__ = 'Show'
+#     id = db.Column(db.Integer, primary_key=True)
+#     artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id'), nullable=False)
+#     venue_id = db.Column(db.Integer, db.ForeignKey('Venue.id'), nullable=False)
+#     start_time = db.Column(db.DateTime, nullable=False)
 
 # Done Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
 
@@ -352,7 +353,7 @@ def delete_venue(venue_id):
         db.session.close()
 
     return {
-            "message": "Deleting venue with ID: {venue_id} was successful!"
+            "message": f"Deleting venue with ID: {venue_id} was successful!"
         }
     # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
     # clicking that button delete it from the db then redirect the user to the homepage
@@ -482,8 +483,8 @@ def show_artist(artist_id):
     artist = Artist.query.filter_by(id=artist_id).all()[0]
 
     now = datetime.datetime.now()
-    artist.past_shows = Show.query.filter_by(artist_id=artist.id).filter(Show.start_time > now).all()
-    artist.upcoming_shows = Show.query.filter_by(artist_id=artist.id).filter(Show.start_time <= now).all()
+    artist.past_shows = Show.query.filter_by(artist_id=artist.id).filter(Show.start_time < now).all()
+    artist.upcoming_shows = Show.query.filter_by(artist_id=artist.id).filter(Show.start_time >= now).all()
     artist.past_shows_count = len(artist.past_shows)
     artist.upcoming_shows_count = len(artist.upcoming_shows)
     
