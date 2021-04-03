@@ -26,7 +26,7 @@ class Venue(db.Model):
     seeking_description = db.Column(db.String(500))
     genres = db.Column(db.String(120), nullable=False)
     shows = db.relationship('Show', backref='venue',
-                            lazy=True, cascade="all, delete-orphan")
+                            lazy='joined', cascade="all, delete-orphan")
     # Done: implement any missing fields, as a database migration using Flask-Migrate
 
 
@@ -45,7 +45,7 @@ class Artist(db.Model):
     seeking_venue = db.Column(db.Boolean, nullable=False)
     seeking_description = db.Column(db.String(500))
     shows = db.relationship('Show', backref='artist',
-                            lazy=True, cascade="all, delete-orphan")
+                            lazy='joined', cascade="all, delete-orphan")
 
     # Done: implement any missing fields, as a database migration using Flask-Migrate
 

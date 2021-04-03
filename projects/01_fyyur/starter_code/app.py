@@ -266,25 +266,42 @@ def show_venue(venue_id):
         venue.genres = [venue.genres]
 
     now = datetime.datetime.now()
-    venue.past_shows = Show.query.filter_by(venue_id=venue_id).filter(Show.start_time < now).all()
-    venue.upcoming_shows = Show.query.filter_by(venue_id=venue_id).filter(Show.start_time >= now).all()
+    # venue.past_shows = Show.query.filter_by(venue_id=venue_id).filter(Show.start_time < now).all()
+    # venue.upcoming_shows = Show.query.filter_by(venue_id=venue_id).filter(Show.start_time >= now).all()
+    venue.past_shows = []
+    venue.upcoming_shows = []
+    for show in  venue.shows:
+        if show.start_time <= now:
+            venue.past_shows.append({
+                'artist_id': show.artist_id,
+                'artist_name': show.artist.name,
+                'artist_image_link': show.artist.image_link,
+                'start_time': show.start_time.strftime("%m/%d/%Y, %H:%M")
+            })
+        else:
+            venue.upcoming_shows.append({
+                'artist_id': show.artist_id,
+                'artist_name': show.artist.name,
+                'artist_image_link': show.artist.image_link,
+                'start_time': show.start_time.strftime("%m/%d/%Y, %H:%M")
+            })
     
-    for show in venue.past_shows:
-        show.start_time = str(show.start_time)
-        artist = Artist.query.filter_by(id=show.artist_id).all()[0]
-        show.artist_image_link = artist.image_link
-        show.artist_name = artist.name
-        show.artist_id = artist.id
-
-    for show in venue.upcoming_shows:
-        show.start_time = str(show.start_time)
-        artist = Artist.query.filter_by(id=show.artist_id).all()[0]
-        show.artist_image_link = artist.image_link
-        show.artist_name = artist.name
-        show.artist_id = artist.id
-
     venue.past_shows_count = len(venue.past_shows)
     venue.upcoming_shows_count = len(venue.upcoming_shows)
+
+    # for show in venue.past_shows:
+    #     show.start_time = str(show.start_time)
+    #     artist = Artist.query.filter_by(id=show.artist_id).all()[0]
+    #     show.artist_image_link = artist.image_link
+    #     show.artist_name = artist.name
+    #     show.artist_id = artist.id
+
+    # for show in venue.upcoming_shows:
+    #     show.start_time = str(show.start_time)
+    #     artist = Artist.query.filter_by(id=show.artist_id).all()[0]
+    #     show.artist_image_link = artist.image_link
+    #     show.artist_name = artist.name
+    #     show.artist_id = artist.id
 
     return render_template('pages/show_venue.html', venue=venue)
 
@@ -483,10 +500,10 @@ def show_artist(artist_id):
     artist = Artist.query.filter_by(id=artist_id).all()[0]
 
     now = datetime.datetime.now()
-    artist.past_shows = Show.query.filter_by(artist_id=artist.id).filter(Show.start_time < now).all()
-    artist.upcoming_shows = Show.query.filter_by(artist_id=artist.id).filter(Show.start_time >= now).all()
-    artist.past_shows_count = len(artist.past_shows)
-    artist.upcoming_shows_count = len(artist.upcoming_shows)
+    # artist.past_shows = Show.query.filter_by(artist_id=artist.id).filter(Show.start_time < now).all()
+    # artist.upcoming_shows = Show.query.filter_by(artist_id=artist.id).filter(Show.start_time >= now).all()
+    # artist.past_shows_count = len(artist.past_shows)
+    # artist.upcoming_shows_count = len(artist.upcoming_shows)
     
     if ',' in artist.genres or '{' in artist.genres:
         artist.genres = artist.genres[1:]
@@ -495,20 +512,40 @@ def show_artist(artist_id):
     else:
         artist.genres = [artist.genres]
 
+    artist.past_shows = []
+    artist.upcoming_shows = []
+    for show in  artist.shows:
+        if show.start_time <= now:
+            artist.past_shows.append({
+                'venue_id': show.venue_id,
+                'venue_name': show.venue.name,
+                'venue_image_link': show.venue.image_link,
+                'start_time': show.start_time.strftime("%m/%d/%Y, %H:%M")
+            })
+        else:
+            artist.upcoming_shows.append({
+                'venue_id': show.venue_id,
+                'venue_name': show.venue.name,
+                'venue_image_link': show.venue.image_link,
+                'start_time': show.start_time.strftime("%m/%d/%Y, %H:%M")
+            })
+    
+    artist.past_shows_count = len(artist.past_shows)
+    artist.upcoming_shows_count = len(artist.upcoming_shows)
 
-    for show in artist.past_shows:
-        show.start_time = str(show.start_time)
-        venue = Venue.query.filter_by(id=show.venue_id).all()[0]
-        show.venue_image_link = venue.image_link
-        show.venue_name = venue.name
-        show.venue_id = venue.id
+    # for show in artist.past_shows:
+    #     show.start_time = str(show.start_time)
+    #     venue = Venue.query.filter_by(id=show.venue_id).all()[0]
+    #     show.venue_image_link = venue.image_link
+    #     show.venue_name = venue.name
+    #     show.venue_id = venue.id
 
-    for show in artist.upcoming_shows:
-        show.start_time = str(show.start_time)
-        venue = Venue.query.filter_by(id=show.venue_id).all()[0]
-        show.venue_image_link = venue.image_link
-        show.venue_name = venue.name
-        show.venue_id = venue.id
+    # for show in artist.upcoming_shows:
+    #     show.start_time = str(show.start_time)
+    #     venue = Venue.query.filter_by(id=show.venue_id).all()[0]
+    #     show.venue_image_link = venue.image_link
+    #     show.venue_name = venue.name
+    #     show.venue_id = venue.id
 
     return render_template('pages/show_artist.html', artist=artist)
 
