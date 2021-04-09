@@ -12,21 +12,36 @@ def create_app(test_config=None):
   # create and configure the app
   app = Flask(__name__)
   setup_db(app)
+  CORS(app, resources={r"/*": {"origins": "*"}})
   
   '''
   @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
   '''
 
+
   '''
   @TODO: Use the after_request decorator to set Access-Control-Allow
   '''
+  @app.after_request
+  def after_request(response):
+      response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+      response.headers.add('Access-Control-Allow-Methods', '*')
+      return response
 
   '''
   @TODO: 
   Create an endpoint to handle GET requests 
   for all available categories.
   '''
+  @app.route('/categories')
+  def get_categories():
+    categories = Category.query.all()
+    print(categories)
+    formatted_categories = [c.format() for c in categories]
 
+    return jsonify({
+      'categories': formatted_categories
+    })
 
   '''
   @TODO: 
@@ -40,6 +55,25 @@ def create_app(test_config=None):
   ten questions per page and pagination at the bottom of the screen for three pages.
   Clicking on the page numbers should update the questions. 
   '''
+  @app.route('/questions')
+  def get_questions():
+    page = request.args.get('page', 1, type=int)
+
+    questions = Question.query.limit(QUESTIONS_PER_PAGE).offset(QUESTIONS_PER_PAGE * (page - 1)).all()
+    if len(questions) == 0:
+      return abort(404)
+    
+    formatted_questions = [q.format() for q in questions]
+
+    categories = Category.query.all()
+    formatted_categories = [c.format()['type'] for c in categories]
+
+    return jsonify({
+      'questions': formatted_questions, 
+      'total_questions': len(questions),
+      'categories': formatted_categories,
+      'current_category': categories[0].format()['type']
+    })
 
   '''
   @TODO: 
