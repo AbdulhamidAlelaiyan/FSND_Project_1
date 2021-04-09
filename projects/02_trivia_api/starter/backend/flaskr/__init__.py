@@ -36,7 +36,6 @@ def create_app(test_config=None):
   @app.route('/categories')
   def get_categories():
     categories = Category.query.all()
-    print(categories)
     formatted_categories = [c.format() for c in categories]
 
     return jsonify({
@@ -70,9 +69,9 @@ def create_app(test_config=None):
 
     return jsonify({
       'questions': formatted_questions, 
-      'total_questions': len(questions),
+      'totalQuestions': len(questions),
       'categories': formatted_categories,
-      'current_category': categories[0].format()['type']
+      'currentCategory': categories[0].format()['type']
     })
 
   '''
@@ -106,26 +105,33 @@ def create_app(test_config=None):
   @app.route('/questions', methods=['POST'])
   def create_post():
     data = request.get_json()
-    try:
-      question = Question(question=data['question'], answer=data['answer'], difficulty=data['difficulty'], category=data['category'])
-      question.insert()
+    '''
+    @TODO: 
+    Create a POST endpoint to get questions based on a search term. 
+    It should return any questions for whom the search term 
+    is a substring of the question. 
 
+    TEST: Search by any phrase. The questions list will update to include 
+    only question that include that string within their question. 
+    Try using the word "title" to start. 
+    '''
+    if data.get('search_term'):
+      results = Question.query.filter(Question.question.ilike(f"%{data['search_term']}%")).all()
       return jsonify({
-        'success': True
-      }), 201
-    except:
-      return  Response(status=400)
+        'questions': [q.format() for q in results],
+        'totalQuestions': len(results),
+        'currentCategory': 1,
+      })
+    else:  
+      try:
+        question = Question(question=data['question'], answer=data['answer'], difficulty=data['difficulty'], category=data['category'])
+        question.insert()
 
-  '''
-  @TODO: 
-  Create a POST endpoint to get questions based on a search term. 
-  It should return any questions for whom the search term 
-  is a substring of the question. 
-
-  TEST: Search by any phrase. The questions list will update to include 
-  only question that include that string within their question. 
-  Try using the word "title" to start. 
-  '''
+        return jsonify({
+          'success': True
+        }), 201
+      except:
+        return  Response(status=400)
 
   '''
   @TODO: 
@@ -135,7 +141,19 @@ def create_app(test_config=None):
   categories in the left column will cause only questions of that 
   category to be shown. 
   '''
+  @app.route('/categories/<int:category_id>/questions')
+  def get_questions_by_category(category_id):
+    questions = Question.query.filter_by(category=category_id).all()
+    questions_formatted = [q.format() for q in questions]
 
+    if questions:
+      return jsonify({
+        'questions': questions_formatted,
+        'totalQuestions': len(questions_formatted),
+        'currentCategory': Category.query.filter_by(id=category_id).all()[0].format()['id']
+      })
+    else:
+      return abort(404)
 
   '''
   @TODO: 

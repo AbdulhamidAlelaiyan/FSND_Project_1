@@ -34,9 +34,9 @@ class TriviaTestCase(unittest.TestCase):
         categories_total = len(Category.query.all())
 
         self.assertEqual(len(data['questions']), 10)
-        self.assertEqual(data['total_questions'], total_questions)
+        self.assertEqual(data['totalQuestions'], total_questions)
         self.assertEqual(len(data['categories']), categories_total)
-        self.assertTrue(data['current_category'])
+        self.assertTrue(data['currentCategory'])
 
     def test_get_paginated_questions_with_invalid_page_number(self):
         response = self.client().get('/questions?page=1000')
@@ -71,6 +71,39 @@ class TriviaTestCase(unittest.TestCase):
         })
 
         self.assertEqual(response.status_code, 400)
+
+    def test_search_questions_with_results(self):
+        response = self.client().post('/questions', json={
+            'search_term': 'indian',
+        })
+        data = json.loads(response.data)
+
+        self.assertTrue(data['questions'])
+        self.assertEqual(data['totalQuestions'], 1)
+        self.assertTrue(data['currentCategory'])
+
+    def test_search_questions_without_results(self):
+        response = self.client().post('/questions', json={
+            'search_term': 'north pole',
+        })
+        data = json.loads(response.data)
+
+        self.assertFalse(data['questions'])
+        self.assertEqual(data['totalQuestions'], 0)
+        self.assertTrue(data['currentCategory'])
+
+    def test_get_questions_by_category(self):
+        response = self.client().get('/categories/1/questions')
+        data = json.loads(response.data)
+
+        self.assertTrue(data['questions'])
+        self.assertEqual(data['totalQuestions'], len(data['questions']))
+        self.assertEqual(data['currentCategory'], 1)
+
+    def test_get_questions_by_invalid_category(self):
+        response = self.client().get('/categories/9/questions')
+
+        self.assertEqual(response.status_code, 404)
         
     
     def tearDown(self):
