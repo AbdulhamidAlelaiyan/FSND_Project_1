@@ -42,6 +42,16 @@ class TriviaTestCase(unittest.TestCase):
         response = self.client().get('/questions?page=1000')
 
         self.assertEqual(response.status_code, 404)
+
+    def test_delete_question(self):
+        response = self.client().delete('/questions/11')
+
+        self.assertEqual(response.status_code, 204)
+
+    def test_delete_question_with_invalid_id(self):
+        response = self.client().delete('/questions/1000')
+
+        self.assertEqual(response.status_code, 404)
     
     def tearDown(self):
         """Executed after reach test"""
