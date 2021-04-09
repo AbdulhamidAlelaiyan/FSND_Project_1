@@ -103,6 +103,18 @@ def create_app(test_config=None):
   the form will clear and the question will appear at the end of the last page
   of the questions list in the "List" tab.  
   '''
+  @app.route('/questions', methods=['POST'])
+  def create_post():
+    data = request.get_json()
+    try:
+      question = Question(question=data['question'], answer=data['answer'], difficulty=data['difficulty'], category=data['category'])
+      question.insert()
+
+      return jsonify({
+        'success': True
+      }), 201
+    except:
+      return  Response(status=400)
 
   '''
   @TODO: 

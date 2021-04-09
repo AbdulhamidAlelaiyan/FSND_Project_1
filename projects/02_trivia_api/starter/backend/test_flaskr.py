@@ -43,15 +43,35 @@ class TriviaTestCase(unittest.TestCase):
 
         self.assertEqual(response.status_code, 404)
 
-    def test_delete_question(self):
-        response = self.client().delete('/questions/11')
+    # def test_delete_question(self):
+    #     response = self.client().delete('/questions/11')
 
-        self.assertEqual(response.status_code, 204)
+    #     self.assertEqual(response.status_code, 204)
 
     def test_delete_question_with_invalid_id(self):
         response = self.client().delete('/questions/1000')
 
         self.assertEqual(response.status_code, 404)
+
+    def test_create_question(self):
+        response = self.client().post('/questions', json={
+            'question': 'What is my name?',
+            'answer': 'Abdulhamid',
+            'difficulty': 4,
+            'category': 1
+        })
+
+        self.assertEqual(response.status_code, 201)
+
+    def test_create_question_with_no_question_key(self):
+        response = self.client().post('/questions', json={
+            'answer': 'Abdulhamid',
+            'difficulty': 4,
+            'category': 1
+        })
+
+        self.assertEqual(response.status_code, 400)
+        
     
     def tearDown(self):
         """Executed after reach test"""
