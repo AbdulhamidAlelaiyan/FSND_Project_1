@@ -26,6 +26,22 @@ class TriviaTestCase(unittest.TestCase):
             # create all tables
             self.db.create_all()
 
+
+    # GET /categories
+    def test_get_categories(self):
+        response = self.client().get('/categories')
+        data = json.loads(response.data)
+
+        self.assertTrue(data['categories'])
+
+    # GET /categories
+    def test_get_categories_with_put_method(self):
+        response = self.client().put('/categories')
+
+        self.assertEqual(response.status_code, 404)
+
+
+    # GET /questions
     def test_get_paginated_questions(self):
         response = self.client().get('/questions?page=1')
         data = json.loads(response.data)
@@ -38,21 +54,25 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(len(data['categories']), categories_total)
         self.assertTrue(data['currentCategory'])
 
+    # GET /questions
     def test_get_paginated_questions_with_invalid_page_number(self):
         response = self.client().get('/questions?page=1000')
 
         self.assertEqual(response.status_code, 404)
 
-    # def test_delete_question(self):
-    #     response = self.client().delete('/questions/11')
+    # DELETE /questions/<int:question_id>
+    def test_delete_question(self):
+        response = self.client().delete('/questions/11')
 
-    #     self.assertEqual(response.status_code, 204)
+        self.assertEqual(response.status_code, 204)
 
+    # DELETE /questions/<int:question_id>
     def test_delete_question_with_invalid_id(self):
         response = self.client().delete('/questions/1000')
 
         self.assertEqual(response.status_code, 404)
 
+    # POST /questions
     def test_create_question(self):
         response = self.client().post('/questions', json={
             'question': 'What is my name?',
@@ -63,6 +83,7 @@ class TriviaTestCase(unittest.TestCase):
 
         self.assertEqual(response.status_code, 201)
 
+    # POST /questions
     def test_create_question_with_no_question_key(self):
         response = self.client().post('/questions', json={
             'answer': 'Abdulhamid',
@@ -72,6 +93,7 @@ class TriviaTestCase(unittest.TestCase):
 
         self.assertEqual(response.status_code, 400)
 
+    # POST /questions
     def test_search_questions_with_results(self):
         response = self.client().post('/questions', json={
             'search_term': 'indian',
@@ -82,6 +104,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['totalQuestions'], 1)
         self.assertTrue(data['currentCategory'])
 
+    # POST /questions
     def test_search_questions_without_results(self):
         response = self.client().post('/questions', json={
             'search_term': 'north pole',
@@ -92,6 +115,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['totalQuestions'], 0)
         self.assertTrue(data['currentCategory'])
 
+    # GET /categories/<int:category_id>/questions
     def test_get_questions_by_category(self):
         response = self.client().get('/categories/1/questions')
         data = json.loads(response.data)
@@ -100,10 +124,29 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['totalQuestions'], len(data['questions']))
         self.assertEqual(data['currentCategory'], 1)
 
+    # GET /categories/<int:category_id>/questions
     def test_get_questions_by_invalid_category(self):
         response = self.client().get('/categories/9/questions')
 
         self.assertEqual(response.status_code, 404)
+
+    # GET /quizzes
+    def test_get_next_question(self):
+        response = self.client().post('/quizzes', json={
+            'quiz_category': 1
+        })
+        data = json.loads(response.data)
+
+        self.assertTrue(data['question'])
+        
+    # GET /quizzes
+    def test_get_next_question_with_invalid_id(self):
+        response = self.client().post('/quizzes', json={
+            'quiz_category': 100
+        })
+
+        self.assertEqual(response.status_code, 404)
+
         
     
     def tearDown(self):

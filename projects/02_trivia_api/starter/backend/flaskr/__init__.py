@@ -38,6 +38,7 @@ def create_app(test_config=None):
     categories = Category.query.all()
     formatted_categories = [c.format() for c in categories]
 
+
     return jsonify({
       'categories': formatted_categories
     })
@@ -65,7 +66,7 @@ def create_app(test_config=None):
     formatted_questions = [q.format() for q in questions]
 
     categories = Category.query.all()
-    formatted_categories = [c.format()['type'] for c in categories]
+    formatted_categories = [c.format() for c in categories]
 
     return jsonify({
       'questions': formatted_questions, 
@@ -166,12 +167,30 @@ def create_app(test_config=None):
   one question at a time is displayed, the user is allowed to answer
   and shown whether they were correct or not. 
   '''
+  @app.route('/quizzes', methods=['POST'])
+  def play_quiz():
+    data = request.get_json()
+    try:
+      next_question = Question.query.filter_by(category=data['quiz_category']).all()[0].format()
+      return jsonify({
+        'question': next_question
+      })
+    except:
+      abort(404)
 
   '''
   @TODO: 
   Create error handlers for all expected errors 
   including 404 and 422. 
   '''
+  @app.errorhandler(404)
+  def not_found(error):
+    return Response(status=404)
+
+  @app.errorhandler(422)
+  def unproccessable(error):
+    return Response(status=422)
+
   
   return app
 
