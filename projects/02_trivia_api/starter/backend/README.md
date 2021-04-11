@@ -45,12 +45,18 @@ To run the server, execute:
 ```bash
 export FLASK_APP=flaskr
 export FLASK_ENV=development
+export DATABASE_USER=
+export DATABASE_PASSWORD=
+export DATABASE_URL=localhost
+export DATABASE_PORT=5432
 flask run
 ```
 
 Setting the `FLASK_ENV` variable to `development` will detect file changes and restart the server automatically.
 
-Setting the `FLASK_APP` variable to `flaskr` directs flask to use the `flaskr` directory and the `__init__.py` file to find the application. 
+Setting the `FLASK_APP` variable to `flaskr` directs flask to use the `flaskr` directory and the `__init__.py` file to find the application. ]
+
+DATABASE_USER, DATABASE_PASSWORD, DATABASE_URL and DATABASE_PORT env variables should be set, if those env variables were not set then the default values will be used which are: localhost for DATABASE_URL and port 5432 for DATABASE_PORT and the rest of env variables will be empty.
 
 ## Tasks
 
