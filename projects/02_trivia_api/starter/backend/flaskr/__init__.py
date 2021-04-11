@@ -191,6 +191,10 @@ def create_app(test_config=None):
   Create error handlers for all expected errors 
   including 404 and 422. 
   '''
+  @app.errorhandler(400)
+  def bad_request(error):
+    return Response(status=400)
+
   @app.errorhandler(404)
   def not_found(error):
     return Response(status=404)
@@ -202,6 +206,10 @@ def create_app(test_config=None):
   @app.errorhandler(422)
   def unproccessable(error):
     return Response(status=422)
+
+  @app.errorhandler(500)
+  def unproccessable(error):
+    return Response(status=500)
 
   
   return app
