@@ -32,6 +32,12 @@ def create_app(test_config=None):
   Create an endpoint to handle GET requests 
   for all available categories.
   '''
+  '''
+  GET /categories
+  Returns: {
+    categories: list
+  }
+  '''
   @app.route('/categories')
   def get_categories():
     categories = Category.query.all()
@@ -53,6 +59,15 @@ def create_app(test_config=None):
   you should see questions and categories generated,
   ten questions per page and pagination at the bottom of the screen for three pages.
   Clicking on the page numbers should update the questions. 
+  '''
+  '''
+  GET /questions
+  Returns: {
+    questions: list,
+    totalQuestions: int,
+    categories: list,
+    currentCategory: string
+  }
   '''
   @app.route('/questions')
   def get_questions():
@@ -83,6 +98,10 @@ def create_app(test_config=None):
   TEST: When you click the trash icon next to a question, the question will be removed.
   This removal will persist in the database and when you refresh the page. 
   '''
+  '''
+  DELETE /questions/<int:question_id>
+  Returns: HTTP 204
+  '''
   @app.route('/questions/<int:question_id>', methods=['DELETE'])
   def delete_question(question_id):
     question = Question.query.filter_by(id=question_id).all()
@@ -103,6 +122,26 @@ def create_app(test_config=None):
   TEST: When you submit a question on the "Add" tab, 
   the form will clear and the question will appear at the end of the last page
   of the questions list in the "List" tab.  
+  '''
+  '''
+  POST /questions
+  Body: if for search: {
+    searchTerm: string
+        }
+        if for creating a question: {
+          question: string,
+          answer: string,
+          difficulty: int,
+          category: int
+        }
+  Returns: if for search: {
+            questions: list,
+            totalQuestions: int,
+            currentCategory: int
+            }
+            if for creating a question: {
+              success: bool
+            } with HTTP 201
   '''
   @app.route('/questions', methods=['POST'])
   def create_post():
@@ -143,6 +182,14 @@ def create_app(test_config=None):
   categories in the left column will cause only questions of that 
   category to be shown. 
   '''
+  '''
+  GET /categories/<int:category_id>/questions
+  Returns: {
+    questions: list,
+    totalQuestions: int,
+    currentCategory: int
+  }
+  '''
   @app.route('/categories/<int:category_id>/questions')
   def get_questions_by_category(category_id):
     questions = Question.query.filter_by(category=category_id).all()
@@ -167,6 +214,18 @@ def create_app(test_config=None):
   TEST: In the "Play" tab, after a user selects "All" or a category,
   one question at a time is displayed, the user is allowed to answer
   and shown whether they were correct or not. 
+  '''
+  '''
+  POST /quizzes
+  Returns: {
+    question: {
+      id: int,
+      question: string,
+      answer: string,
+      category: int,
+      difficulty: int
+    }
+  }
   '''
   @app.route('/quizzes', methods=['POST'])
   def play_quiz():
