@@ -5,11 +5,12 @@ import json
 
 database_name = "trivia"
 database_path = "postgresql://{}:{}@{}:{}/{}".format(
-    os.environ.get('DATABASE_USER', ''),
-    os.environ.get('DATABASE_PASSWORD', ''),
-    os.environ.get('DATABASE_URL', 'localhost'),
-    os.environ.get('DATABASE_PORT', '5432'),
-    database_name)
+    os.environ.get("DATABASE_USER", ""),
+    os.environ.get("DATABASE_PASSWORD", ""),
+    os.environ.get("DATABASE_URL", "localhost"),
+    os.environ.get("DATABASE_PORT", "5432"),
+    database_name,
+)
 
 db = SQLAlchemy()
 
