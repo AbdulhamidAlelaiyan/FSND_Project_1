@@ -251,10 +251,10 @@ GET /categories/<int:category_id>/questions
 }
 
 POST /quizzes 
-- Fetches a question from certain quiz category.
+- Fetches a not repeated question from certain quiz category.
 - Request Arguments: None
-- Returns: An object with question key containning the question object
-- Sample: `curl -X POST http://127.0.0.1:5000/quizzes -H 'Content-Type: application/json' -d "{\"quiz_category\": 1}"`
+- Returns: An object with question key containing the question object
+- Sample: `curl -X POST http://127.0.0.1:5000/quizzes -H 'Content-Type: application/json' -d "{\"quiz_category\": {\"id\": \"1\"}}"`
 {
   "question": {
     "answer": "The Liver", 

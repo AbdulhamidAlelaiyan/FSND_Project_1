@@ -38,7 +38,7 @@ class TriviaTestCase(unittest.TestCase):
     def test_get_categories_with_put_method(self):
         response = self.client().put('/categories')
 
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 405)
 
 
     # GET /questions
@@ -96,7 +96,7 @@ class TriviaTestCase(unittest.TestCase):
     # POST /questions
     def test_search_questions_with_results(self):
         response = self.client().post('/questions', json={
-            'search_term': 'indian',
+            'searchTerm': 'indian',
         })
         data = json.loads(response.data)
 
@@ -107,7 +107,7 @@ class TriviaTestCase(unittest.TestCase):
     # POST /questions
     def test_search_questions_without_results(self):
         response = self.client().post('/questions', json={
-            'search_term': 'north pole',
+            'searchTerm': 'north pole',
         })
         data = json.loads(response.data)
 
@@ -133,19 +133,26 @@ class TriviaTestCase(unittest.TestCase):
     # GET /quizzes
     def test_get_next_question(self):
         response = self.client().post('/quizzes', json={
-            'quiz_category': 1
+            'quiz_category': {
+                'id': 1
+            },
+            'previous_questions': [17]
         })
         data = json.loads(response.data)
 
         self.assertTrue(data['question'])
-        
-    # GET /quizzes
-    def test_get_next_question_with_invalid_id(self):
-        response = self.client().post('/quizzes', json={
-            'quiz_category': 100
-        })
 
-        self.assertEqual(response.status_code, 404)
+    # GET /quizzes
+    def test_get_next_question_with_invalid_category_id(self):
+        response = self.client().post('/quizzes', json={
+            'quiz_category': {
+                'id': 100
+            },
+            'previous_questions': [17]
+        })
+        data = json.loads(response.data)
+
+        self.assertFalse(data['question'])
 
         
     

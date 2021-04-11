@@ -117,8 +117,8 @@ def create_app(test_config=None):
     only question that include that string within their question. 
     Try using the word "title" to start. 
     '''
-    if data.get('search_term'):
-      results = Question.query.filter(Question.question.ilike(f"%{data['search_term']}%")).all()
+    if data.get('searchTerm'):
+      results = Question.query.filter(Question.question.ilike(f"%{data['searchTerm']}%")).all()
       return jsonify({
         'questions': [q.format() for q in results],
         'totalQuestions': len(results),
@@ -172,13 +172,19 @@ def create_app(test_config=None):
   def play_quiz():
     data = request.get_json()
     try:
-      next_question = Question.query.filter_by(category=data['quiz_category']).all()[0].format()
-      
+      data_set = set(data['previous_questions'])
+      available_questions_ids = {q.id for q in Question.query.filter_by(category=data['quiz_category']['id']).all()}
+      available_questions_ids.difference_update(data_set)
+
+      next_question = Question.query.filter_by(id=list(available_questions_ids)[0]).all()[0].format()
+
       return jsonify({
         'question': next_question
       })
     except:
-      abort(404)
+      return jsonify({
+        'question': False
+      })
 
   '''
   @TODO: 
@@ -188,6 +194,10 @@ def create_app(test_config=None):
   @app.errorhandler(404)
   def not_found(error):
     return Response(status=404)
+
+  @app.errorhandler(405)
+  def not_found(error):
+    return Response(status=405)
 
   @app.errorhandler(422)
   def unproccessable(error):
