@@ -36,7 +36,7 @@ def create_app(test_config=None):
   @app.route('/categories')
   def get_categories():
     categories = Category.query.all()
-    formatted_categories = [c.format() for c in categories]
+    formatted_categories = [c.format()['type'] for c in categories]
 
 
     return jsonify({
@@ -66,7 +66,9 @@ def create_app(test_config=None):
     formatted_questions = [q.format() for q in questions]
 
     categories = Category.query.all()
-    formatted_categories = [c.format() for c in categories]
+    formatted_categories = [c.format()['type'] for c in categories]
+
+
 
     return jsonify({
       'questions': formatted_questions, 
