@@ -12,12 +12,11 @@ def create_app(test_config=None):
   # create and configure the app
   app = Flask(__name__)
   setup_db(app)
-  CORS(app, resources={r"/*": {"origins": "*"}})
-  
+
   '''
   @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
   '''
-
+  CORS(app, resources={r"/*": {"origins": "*"}})
 
   '''
   @TODO: Use the after_request decorator to set Access-Control-Allow
@@ -174,6 +173,7 @@ def create_app(test_config=None):
     data = request.get_json()
     try:
       next_question = Question.query.filter_by(category=data['quiz_category']).all()[0].format()
+      
       return jsonify({
         'question': next_question
       })
