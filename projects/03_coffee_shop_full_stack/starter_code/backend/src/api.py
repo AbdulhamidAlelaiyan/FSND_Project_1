@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, jsonify, abort
+from flask import Flask, request, jsonify, abort, Response
 from sqlalchemy import exc
 import json
 from flask_cors import CORS
@@ -17,7 +17,7 @@ CORS(app)
 !! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
 !! Running this funciton will add one
 '''
-# db_drop_and_create_all()
+db_drop_and_create_all()
 
 # ROUTES
 '''
@@ -88,8 +88,28 @@ def create_drink(*args):
 '''
 @app.route('/drinks/<id>', methods=['PATCH'])
 @requires_auth('patch:drinks')
-def update_drink(id):
-    return 404
+def update_drink(*args, **kwargs):
+    id = kwargs['id']
+    data = request.get_json()
+
+    try:
+        drink = Drink.query.filter_by(id=id).one()
+    except:
+        return abort(404)
+    
+    if data.get('title'):
+        drink.title = data.get('title')
+    
+    if data.get('recipe'):
+        drink.recipe = json.dumps(data.get('recipe'))
+
+    drink.update()
+    
+    return jsonify({
+        'success': True,
+        'drinks': [Drink.query.filter_by(id=id).one().long()],
+    })
+
 
 
 '''
@@ -104,8 +124,16 @@ def update_drink(id):
 '''
 @app.route('/drinks/<id>', methods=['DELETE'])
 @requires_auth('delete:drinks')
-def delete_drink(id):
-    return 404
+def delete_drink(*args, **kwargs):
+    id = kwargs['id']
+
+    drink = Drink.query.filter_by(id=id).all()[0]
+    drink.delete()
+
+    return jsonify({
+        'success': True,
+        'delete': id
+    })
 
 # Error Handling
 '''
@@ -141,7 +169,6 @@ def unauthorized_access(error):
         "message": "user unauthorized"
         }), 403
 
-
 '''
 @TODO implement error handler for 404
     error handler should conform to general task above
@@ -161,3 +188,11 @@ def unprocessable(error):
         "error": 422,
         "message": "unprocessable"
     }), 422
+
+@app.errorhandler(500)
+def unprocessable(error):
+    return jsonify({
+        "success": False,
+        "error": 500,
+        "message": "internal server error"
+    }), 500
