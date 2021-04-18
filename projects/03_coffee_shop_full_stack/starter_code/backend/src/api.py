@@ -66,8 +66,10 @@ def get_drinks_details(*args):
 @requires_auth('post:drinks')
 def create_drink(*args):
     data = request.get_json()
-    data_recipe = json.dumps([data['recipe']])
-    new_drink = Drink(title=data['title'], recipe=data_recipe) 
+    if type(data.get('recipe')) == list: data_recipe = json.dumps(data['recipe'])
+    else: data_recipe = json.dumps([data['recipe']])
+    
+    new_drink = Drink(title=data['title'], recipe=data_recipe)
     new_drink.insert()
     
     return jsonify({
